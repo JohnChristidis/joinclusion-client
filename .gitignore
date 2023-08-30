@@ -1,0 +1,41 @@
+# Node.js dependencies
+node_modules/
+
+# .env files
+.env
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Debug log from npm
+npm-debug.log*
+
+# Cache
+.cache/
+dist/
+build/
+
+# dotenv environment variables file
+.env.local
+
+# Mac OS
+.DS_Store
+
+# Windows thumbnail cache files
+Thumbs.db
+
+# VSCode directory
+.vscode/
