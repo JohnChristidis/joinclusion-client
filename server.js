@@ -2,7 +2,7 @@ const mysql = require("mysql2/promise");
 const express = require("express");
 const bodyParser = require('body-parser')
 const cors = require("cors");
-require('dotenv').config();
+require('dotenv').config({ path : '.env.dev'});
 
 
 const app = express();
@@ -14,7 +14,7 @@ const corsOptions = {
 };
 
 // Apply CORS middleware with specific options
-app.use(cors(corsOptions));
+app.use(cors());
 const PORT = 3000;
 
 const pool = mysql.createPool({
@@ -32,6 +32,30 @@ app.post('/login', async (req, res) => {
 
         const [rows] = await connection.execute(
             "SELECT * FROM teachers WHERE username = ? AND pwd = ?",
+            [username, pwd]
+        );
+
+        connection.release();
+
+        if (rows.length === 0) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        res.status(200).json({ message: "Login successful", teacher: rows[0] });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.post('/login-student', async (req, res) => {
+    try {
+        const { username, pwd } = req.body;
+
+        const connection = await pool.getConnection();
+
+        const [rows] = await connection.execute(
+            "SELECT * FROM students WHERE username = ? AND pwd = ?",
             [username, pwd]
         );
 
@@ -136,6 +160,20 @@ app.get('/mod/:id', async (req, res) => {
     }
 });
 
+app.get('/mod_game/:mod_code', async (req, res) => {
+    try {
+        const { mod_code } = req.params; // Get the ID from the request parameters
+        const connection = await pool.getConnection();
+        const [rows, fields] = await connection.execute("SELECT * FROM mods WHERE mode_code = ?", [mod_code]); // Specify the desired columns and the condition
+        connection.release();
+        console.log("hi");
+        res.status(200).json(rows); // Return status 200 for successful response
+    } catch (error) {
+        console.error("Error executing query:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 app.put('/update-mod/:id', async (req, res) => {
     try {
         const idToUpdate = req.params.id;
@@ -184,18 +222,61 @@ app.put('/publish-mod/:id', async (req, res) => {
             published, idToUpdate
         ]);
 
-        connection.release();
-
         if (result.affectedRows === 0) {
+            connection.release();
             return res.status(404).json({ error: "Mod not found" });
         }
 
-        res.status(200).json({ message: "Mod updated successfully" });
+        const getModQuery = `
+            SELECT * FROM mods
+            WHERE id = ?
+        `;
+
+        const [updatedMod] = await connection.execute(getModQuery, [idToUpdate]);
+
+        connection.release();
+
+        if (updatedMod.length === 0) {
+            return res.status(404).json({ error: "Mod not found" });
+        }
+
+        res.status(200).json({ message: "Mod updated successfully", mod: updatedMod[0] });
     } catch (error) {
         console.error("Error executing query:", error);
         res.status(500).send("Internal Server Error");
     }
 });
+
+app.put('/play-mod/:code', async (req, res) => {
+    try {
+        const idToUpdate = req.params.code;
+        //const { published } = req.body;
+        console.log("Hi");
+        const connection = await pool.getConnection();
+
+
+
+        const getModQuery = `
+            SELECT * FROM mods
+            WHERE mode_code = ?
+        `;
+
+        const [updatedMod] = await connection.execute(getModQuery, [idToUpdate]);
+
+        connection.release();
+
+        if (updatedMod.length === 0) {
+            return res.status(404).json({ error: "Mod not found" });
+        }
+        console.log(updatedMod[0]);
+
+        res.status(200).json({ message: "Mod updated successfully", mod: updatedMod[0] });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 
 app.put('/unpublish-mod/:id', async (req, res) => {
     try {
@@ -212,6 +293,36 @@ app.put('/unpublish-mod/:id', async (req, res) => {
 
         const [result] = await connection.execute(updateQuery, [
             published, idToUpdate
+        ]);
+
+        connection.release();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Mod not found" });
+        }
+
+        res.status(200).json({ message: "Mod updated successfully" });
+    } catch (error) {
+        console.error("Error executing query:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+app.put('/unplay-mod/:code', async (req, res) => {
+    try {
+        const idToUpdate = req.params.id;
+        //const { published } = req.body;
+
+        const connection = await pool.getConnection();
+
+        const updateQuery = `
+            UPDATE mods
+            SET published = 0
+            WHERE id = ?
+        `;
+
+        const [result] = await connection.execute(updateQuery, [
+            /*published,*/ idToUpdate
         ]);
 
         connection.release();
