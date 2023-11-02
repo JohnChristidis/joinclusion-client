@@ -2,7 +2,7 @@ const mysql = require("mysql2/promise");
 const express = require("express");
 const bodyParser = require('body-parser')
 const cors = require("cors");
-require('dotenv').config({ path : '.env.dev'});
+require('dotenv').config();
 const fs = require('fs');
 
 const https = require('https');
