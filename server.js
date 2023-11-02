@@ -3,15 +3,45 @@ const express = require("express");
 const bodyParser = require('body-parser')
 const cors = require("cors");
 require('dotenv').config({ path : '.env.dev'});
+const fs = require('fs');
 
+const https = require('https');
 
 const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}))
 // Configure CORS to allow requests from a specific origin
-const corsOptions = {
-  origin: 'http://localhost:5173'
-};
+
+let corsOptions;
+if(process.env.ENVIRONMENT === 'development'){
+  corsOptions = {
+    origin: 'http://localhost:5173'
+  }
+}else{
+
+  corsOptions = {
+     origin: 'https://joinclusion-test.fse.unimaas.nl:5173'
+  }
+
+}
+let options;
+if(process.env.ENVIRONMENT !== 'development'){
+  options = {
+
+     key: fs.readFileSync(process.env.LOCATION_KEY_FILE),
+
+    cert: fs.readFileSync(process.env.LOCATION_CERTIFICATE_FILE),
+
+  };
+}
+
+
+
+// const corsOptions = {
+//   origin: 'http://localhost:5173'
+//
+// };
+
 
 // Apply CORS middleware with specific options
 app.use(cors());
@@ -364,7 +394,20 @@ app.delete('/delete-mod/:id', async (req, res) => {
     }
 });
 
+let server;
+if(process.env.ENVIRONMENT === 'development') {
+  app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+  });
+} else {
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+  server = https.createServer(options, app);
+  server.listen(PORT, () => {
+
+    console.log(`Server is running on https port ${PORT}`);
+
+  });
+}
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`);
+// });
