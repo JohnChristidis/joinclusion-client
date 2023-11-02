@@ -22,10 +22,18 @@ Before you begin, ensure you have the following installed on your development ma
    };
    const PORT = 3000;
    // create an .env file and import the following with your values. e.g.
+
    PORT=3000
    DB_HOST=localhost
    DB_USER=username
    DB_PASSWORD=password
    DB_NAME=joinclusion
+
+   ------> UPDATE <------
+   In the .env add the following
+   ENVIRONMENT=development
+   LOCATION_KEY_FILE= your_key
+   LOCATION_CERTIFICATE_FILE= your_certificate
+   -------> END OF UPDATE <-------
 
    nodemon server.js
