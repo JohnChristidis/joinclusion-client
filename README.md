@@ -36,4 +36,13 @@ Before you begin, ensure you have the following installed on your development ma
    LOCATION_CERTIFICATE_FILE= your_certificate
    -------> END OF UPDATE <-------
 
+   ------> UPDATE 14/11 <--------
+   In the .env add the following
+   ORIGIN=your_url
+   Also change the following
+   ENVIRONMENT=development
+   to
+   ENVIRONMENT=staging
+   ------> END OF UPDATE <------
+
    nodemon server.js

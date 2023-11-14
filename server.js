@@ -20,7 +20,7 @@ if(process.env.ENVIRONMENT === 'development'){
 }else{
 
   corsOptions = {
-     origin: 'https://joinclusion-test.fse.unimaas.nl:5173'
+     origin: process.env.ORIGIN
   }
 
 }
