@@ -280,27 +280,17 @@ app.put('/publish-mod/:id', async (req, res) => {
 app.put('/play-mod/:code', async (req, res) => {
     try {
         const idToUpdate = req.params.code;
-        //const { published } = req.body;
-        console.log("Hi");
         const connection = await pool.getConnection();
-
-
-
         const getModQuery = `
             SELECT * FROM mods
             WHERE mode_code = ?
         `;
-
         const [updatedMod] = await connection.execute(getModQuery, [idToUpdate]);
-
         connection.release();
-
         if (updatedMod.length === 0) {
             return res.status(404).json({ error: "Mod not found" });
         }
-        console.log(updatedMod[0]);
-
-        res.status(200).json({ message: "Mod updated successfully", mod: updatedMod[0] });
+        res.status(200).json({ message: "Mod found", mod: updatedMod[0] });
     } catch (error) {
         console.error("Error executing query:", error);
         res.status(500).send("Internal Server Error");
